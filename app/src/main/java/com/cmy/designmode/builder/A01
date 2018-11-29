@@ -1,0 +1,34 @@
+
+构建者模式
+说明:
+    Product -- 产品的抽象类
+    Builder -- 抽象Builder类,规范产品组建,一般是由子类实现具体的组建
+    ConcreteBuilder -- 具体的Builder类
+    Director  --  统一组装的类
+    eg.............
+    Computer(Product)计算机基类继承者分别为HaiWeiBook和MacBook
+
+    1.应用场景
+    创建一些复杂的对象时,对象内部的构建过程存在复杂变化。
+    相同的构建过程，不同的执行顺序，产生不同结果时。
+    不同配置的构建对象，产生不同结果时。
+    2.优点
+    封装性良好，隐藏内部构建细节。
+    易于解耦，将产品本身与产品创建过程进行解耦，可以使用相同的创建过程来得到不同的产品。也就说细节依赖抽象。
+    易于扩展，具体的建造者类之间相互独立，增加新的具体建造者无需修改原有类库的代码。
+    易于精确控制对象的创建，由于具体的建造者是独立的，因此可以对建造过程逐步细化，而不对其他的模块产生任何影响。
+    3.缺点
+    产生多余的Build对象以及Director类。
+    建造者模式所创建的产品一般具有较多的共同点，其组成部分相似；如果产品之间的差异性很大，则不适合使用建造者模式，因此其使用范围受到一定的限制。
+    如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得很庞大
+
+
+1.第一种原始的构建模式 builder
+     Builder builder = new MacBookBuilder();
+     Director director = new Director(builder);
+     director.construct("因特尔4核","100g内存");
+     builder.create().toString()
+
+
+2.优化后的使用 builder2
+    new HaiWeiBookBuilder().buildBoard("激灵主机").buildDisplay("超级内存").buildOS().create().toString()

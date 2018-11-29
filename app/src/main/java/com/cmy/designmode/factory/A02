@@ -1,0 +1,176 @@
+工厂模式
+说明:
+    Product（抽象产品类）：要创建的复杂对象，定义对象的公共接口。
+    ConcreteProduct（具体产品类）：实现Product接口。
+    Factory（抽象工厂类）：该方法返回一个Product类型的对象。
+    ConcreteFactory（具体工厂类）：返回ConcreteProduct实例
+    eg.............
+
+    1.应用场景
+    生成复杂对象时，无需知道具体类名，只需知道相应的工厂方法即可。
+    2.优点
+    符合开放封闭原则。新增产品时，只需增加相应的具体产品类和相应的工厂子类即可。
+    符合单一职责原则。每个具体工厂类只负责创建对应的产品
+    3.缺点
+    一个具体工厂只能创建一种具体产品。
+    增加新产品时，还需增加相应的工厂类，系统类的个数将成对增加，增加了系统的复杂度和性能开销。
+    引入的抽象类也会导致类结构的复杂化。
+
+1.工厂模式
+      new FactoryA().createProduct().method();
+
+
+可以共用一个工厂生产不同产品
+2.简单工厂
+    new HaiWeiBookBuilder().buildBoard("激灵主机").buildDisplay("超级内存").buildOS().create().toString()
+
+3.抽象工厂
+5.应用场景
+生产多个产品组合的对象时。
+6.优点
+代码解耦，创建实例的工作与使用实例的工作分开，使用者不必关心类对象如何创建。
+7.缺点
+如果增加新的产品,则修改抽象工厂和所有的具体工厂,违反了开放封闭原则
+4.1 创建抽象产品类
+定义公共接口：
+
+    //抽象产品类-- CPU
+    public abstract class CPU {
+        public abstract void showCPU();
+    }
+    //抽象产品类-- 内存
+    public abstract class Memory {
+        public abstract void showMemory();
+    }
+    //抽象产品类-- 硬盘
+    public abstract class HD {
+        public abstract void showHD();
+    }
+4.2 创建具体产品类
+继承Product类：
+
+    //具体产品类-- Intet CPU
+    public class IntelCPU extends CPU {
+
+        @Override
+        public void showCPU() {
+            System.out.println("Intet CPU");
+        }
+    }
+
+    //具体产品类-- AMD CPU
+    public class AmdCPU extends CPU {
+
+        @Override
+        public void showCPU() {
+            System.out.println("AMD CPU");
+        }
+    }
+
+    //具体产品类-- 三星 内存
+    public class SamsungMemory extends Memory {
+
+        @Override
+        public void showMemory() {
+            System.out.println("三星 内存");
+        }
+    }
+
+    //具体产品类-- 金士顿 内存
+    public class KingstonMemory extends Memory {
+
+        @Override
+        public void showMemory() {
+            System.out.println("金士顿 内存");
+        }
+    }
+
+    //具体产品类-- 希捷 硬盘
+    public class SeagateHD extends HD {
+
+        @Override
+        public void showHD() {
+            System.out.println("希捷 硬盘");
+        }
+    }
+
+    //具体产品类-- 西部数据 硬盘
+    public class WdHD extends HD {
+
+        @Override
+        public void showHD() {
+            System.out.println("西部数据 硬盘");
+        }
+    }
+4.3 创建抽象工厂类
+定义工厂中用来创建不同产品的方法：
+
+    //抽象工厂类，电脑工厂类
+    public abstract class ComputerFactory {
+        public abstract CPU createCPU();
+
+        public abstract Memory createMemory();
+
+        public abstract HD createHD();
+    }
+4.4 创建具体工厂类
+继承Factory类：
+
+    //具体工厂类--联想电脑
+    public class LenovoComputerFactory extends ComputerFactory {
+
+        @Override
+        public CPU createCPU() {
+            return new IntelCPU();
+        }
+
+        @Override
+        public Memory createMemory() {
+            return new SamsungMemory();
+        }
+
+        @Override
+        public HD createHD() {
+            return new SeagateHD();
+        }
+    }
+
+    //具体工厂类--华硕电脑
+    public class AsusComputerFactory extends ComputerFactory {
+
+        @Override
+        public CPU createCPU() {
+            return new AmdCPU();
+        }
+
+        @Override
+        public Memory createMemory() {
+            return new KingstonMemory();
+        }
+
+        @Override
+        public HD createHD() {
+            return new WdHD();
+        }
+    }
+
+    //具体工厂类--惠普电脑
+    public class HpComputerFactory extends ComputerFactory {
+
+        @Override
+        public CPU createCPU() {
+            return new IntelCPU();
+        }
+
+        @Override
+        public Memory createMemory() {
+            return new KingstonMemory();
+        }
+
+        @Override
+        public HD createHD() {
+            return new WdHD();
+        }
+    }
+
+
