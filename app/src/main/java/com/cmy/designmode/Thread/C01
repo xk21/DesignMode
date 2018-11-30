@@ -1,0 +1,152 @@
+线程
+说明:
+    1.synchronized 方法控制对类成员变量的访问：每个类实例对应一把锁，每个 synchronized 方法都必须获得
+    调用该方法的类实例的锁方能执行，否则所属线程阻塞，方法一旦执行，就独占该锁，直到从该方法返回时才
+    将锁释放，此后被阻塞的线程方能获得该锁，重新进入可执行状态。这种机制确保了同一时刻对于每一个类实
+    例，其所有声明为 synchronized 的成员函数中至多只有一个处于可执行状态（因为至多只有一个能够获得该
+    类实例对应的锁），从而有效避免了类成员变量的访问冲突（只要所有可能访问类成员变量的方法均被声明为
+     synchronized）。
+    2.synchronized 块是这样一个代码块，其中的代码必须获得对象 syncObject （如前所述，可以是类实例或类
+    ）的锁方能执行。由于可以针对任意代码块，且可任意指定上锁的对象，故灵活性较高。
+
+1.实例锁正确方法错误方法见实例
+final InnerObject innerObj = new InnerObject();
+Thread t03A = new Thread(new Runnable() {
+    @Override
+    public void run() {
+        outerMethod01(innerObj);
+    }
+},"A");
+t03A.start();
+
+Thread t03B = new Thread(new Runnable() {
+    @Override
+    public void run() {
+        outerMethod02(innerObj);
+    }
+},"B");
+t03B.start();
+
+/**
+ * 外部类方法1
+ */
+private void outerMethod01(InnerObject innerObj){
+    synchronized (innerObj) {
+        innerObj.innerMethod01();
+    }
+}
+
+/**
+ * 外部类方法2
+ */
+private void outerMethod02(InnerObject innerObj){
+    innerObj.innerMethod02();
+}
+
+
+class InnerObject{
+    private void innerMethod01(){
+        int i=0;
+        while(i++ < 3){
+            System.out.println(Thread.currentThread().getName() +":"+ i);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void innerMethod02(){
+        int j=0;
+        while(j++ < 3){
+            System.out.println(Thread.currentThread().getName() +":"+ j);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+2 Synchronize作用于方法和静态方法区别
+测试代码如下所示
+private void test() {
+    final TestSynchronized test1 = new TestSynchronized();
+    final TestSynchronized test2 = new TestSynchronized();
+    Thread t1 = new Thread(new Runnable() {
+
+        @Override
+        public void run() {
+            test1.method01("a");
+            //test1.method02("a");
+        }
+    });
+    Thread t2 = new Thread(new Runnable() {
+
+        @Override
+        public void run() {
+            test2.method01("b");
+            //test2.method02("a");
+        }
+    });
+    t1.start();
+    t2.start();
+}
+
+private static class TestSynchronized{
+    private int num1;
+    public synchronized void method01(String arg) {
+        try {
+            if("a".equals(arg)){
+                num1 = 100;
+                System.out.println("tag a set number over");
+                Thread.sleep(1000);
+            }else{
+                num1 = 200;
+                System.out.println("tag b set number over");
+            }
+            System.out.println("tag = "+ arg + ";num ="+ num1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static int  num2;
+    public static synchronized void method02(String arg) {
+        try {
+            if("a".equals(arg)){
+                num2 = 100;
+                System.out.println("tag a set number over");
+                Thread.sleep(1000);
+            }else{
+                num2 = 200;
+                System.out.println("tag b set number over");
+            }
+            System.out.println("tag = "+ arg + ";num ="+ num2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//调用method01方法打印日志【普通方法】
+tag a set number over
+tag b set number over
+tag = b;num =200
+tag = a;num =100
+
+
+//调用method02方法打印日志【static静态方法】
+tag a set number over
+tag = a;num =100
+tag b set number over
+tag = b;num =200
+在static方法前加synchronized：静态方法属于类方法，它属于这个类，获取到的锁，是属于类的锁。
+在普通方法前加synchronized：非static方法获取到的锁，是属于当前对象的锁。
+结论：类锁和对象锁不同，synchronized修饰不加static的方法，锁是加在单个对象上，不同的对象没有竞争关系；
+修饰加了static的方法，锁是加载类上，这个类所有的对象竞争一把锁。
+
+
+
