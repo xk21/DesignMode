@@ -359,6 +359,7 @@ public class A线程01 {
     }
 
     private static void doPrint(String text) {
+
         System.out.println((new Date()).toLocaleString() + " : " + text);
     }
 
