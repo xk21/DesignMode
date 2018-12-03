@@ -351,7 +351,6 @@ public class A线程01 {
             doPrint(Thread.currentThread().getName() + " doSoming1....");
             Thread.sleep(4000);// 等待几秒方便查看线程的先后顺序
             doPrint(Thread.currentThread().getName() + " doSoming2....");
-
             doPrint(Thread.currentThread().getName() + " is finished.");
         } finally {
             sLock.unlock();
@@ -359,7 +358,6 @@ public class A线程01 {
     }
 
     private static void doPrint(String text) {
-
         System.out.println((new Date()).toLocaleString() + " : " + text);
     }
 
