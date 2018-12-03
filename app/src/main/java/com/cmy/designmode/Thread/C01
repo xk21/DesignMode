@@ -9,6 +9,10 @@
     2.synchronized 块是这样一个代码块，其中的代码必须获得对象 syncObject （如前所述，可以是类实例或类
     ）的锁方能执行。由于可以针对任意代码块，且可任意指定上锁的对象，故灵活性较高。
 
+    这两种方式最大区别就是对于Synchronized来说，它是java语言的关键字，是原生语法层面的互斥，需要jvm
+    实现。而ReentrantLock它是JDK 1.5之后提供的API层面的互斥锁，需要lock()和unlock()方法配合try/finally
+    语句块来完成。
+
 1.实例锁正确方法错误方法见实例
 final InnerObject innerObj = new InnerObject();
 Thread t03A = new Thread(new Runnable() {

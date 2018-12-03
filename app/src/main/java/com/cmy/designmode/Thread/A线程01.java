@@ -22,6 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class A线程01 {
 
     private static Lock sLock;
+    private static ReentrantLock sLock2;
 
     public static void main(String[] args){
 
@@ -37,13 +38,15 @@ public class A线程01 {
 
         eg1:
         System.out.println("造成线程阻塞线程2需等待.........");
-
-//        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new testRunnable1());
-//        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new testRunnable1());
+        //当前内部内this锁不能全局锁对象不一样
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new testRunnable1());
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new testRunnable1());
         System.out.println(".........");
         sLock = new ReentrantLock();
+        sLock2 = new ReentrantLock();
 
-//        eg2:
+        eg2:
+        //通用锁sLock 方法一
 //        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
 //            @Override
 //            public void run() {
@@ -84,42 +87,48 @@ public class A线程01 {
                 method1();
             }
         });
-//        eg3:
-//        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (sLock.tryLock()) {
-//                    try {
-//                        method3();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    } finally {
-//                        sLock.unlock();
-//                    }
-//                }else {
-//                    System.out.println("获取锁失败....222.....");
-//                }
-//            }
-//        });
-//        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (sLock.tryLock()) {
-//                    try {
-//                        sLock.lock();
-//                        method3();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    } finally {
-//                        sLock.unlock();
-//                    }
-//                }else {
-//                    System.out.println("获取锁失败.........");
-//                }
-//            }
-//        });
+        eg3:
+        //sLock.tryLock(1,TimeUnit.SECONDS) sLock没有规定释放为false否则则为true
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (sLock.tryLock()) {
+                    try {
+                        method3();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        sLock.unlock();
+                    }
+                }else {
+                    System.out.println("获取锁失败....222.....");
+                }
+            }
+        });
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (sLock.tryLock(1,TimeUnit.SECONDS)){
+
+                    }else {
+                        return;
+                    }
+                        try {
+                            method3();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            sLock.unlock();
+                        }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
 //    eg4:
+        //通用锁sLock
 //    ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(new Runnable() {
 //        @Override
 //        public void run() {
@@ -133,11 +142,27 @@ public class A线程01 {
 //        }
 //    });
 
+        eg5:
+        //两个线程依次打印"A""B",总共打印10次
+        new Thread(new Produce()).start();
+        new Thread(new Produce2()).start();
+
+        //ReentrantLock循序输出A,B,C
+        ConditionService service = new ConditionService();
+        Runnable A = getThreadA(service);
+        Runnable B = getThreadB(service);
+        Runnable C = getThreadC(service);
+
+        new Thread(A, "A").start();
+        new Thread(B, "B").start();
+        new Thread(C, "C").start();
 
         System.out.println(".........");
 
 
     }
+
+
 
     private static class testRunnable1 implements Runnable{
         @Override
@@ -146,7 +171,7 @@ public class A线程01 {
                 for(int i=0;i<10;i++){
                     try {
                         Thread.sleep(10);
-                        System.out.println(Thread.currentThread().getName()+" synchronized loop "+i);
+                        System.out.println(Thread.currentThread().getName()+" testRunnable1 loop "+i);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -158,7 +183,7 @@ public class A线程01 {
     public static void method3(){
         for(int i=0;i<10;i++){
             try {
-                Thread.sleep(10);
+                Thread.sleep(110);
                 System.out.println(Thread.currentThread().getName()+" method3 loop "+i);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -170,7 +195,7 @@ public class A线程01 {
             for (int i = 0; i < 10; i++) {
                 try {
                     Thread.sleep(10);
-                    System.out.println(Thread.currentThread().getName() + " method3 loop " + i);
+                    System.out.println(Thread.currentThread().getName() + " method1 loop " + i);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -183,7 +208,7 @@ public class A线程01 {
             for(int i=0;i<10;i++){
                 try {
                     Thread.sleep(10);
-                    System.out.println(Thread.currentThread().getName()+" method3 loop "+i);
+                    System.out.println(Thread.currentThread().getName()+" method2 loop "+i);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -193,4 +218,81 @@ public class A线程01 {
         }
 
     }
+
+
+    //循序打印
+    public static class Produce2 implements Runnable {
+
+        @Override
+        public void run() {
+            int count =10;
+            while (count>0){
+                synchronized (A线程01.class){
+                    System.out.println("B");
+                    count--;
+                    A线程01.class.notifyAll();
+                    try {
+                        A线程01.class.wait();
+                    }catch (Exception e){
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static class Produce implements Runnable {
+        @Override
+        public void run() {
+            int count =10;
+            while (count>0){
+                synchronized (A线程01.class){
+                    System.out.println("A");
+                    count--;
+                    A线程01.class.notifyAll();
+                    try {
+                        A线程01.class.wait();
+                    }catch (Exception e){
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    private static Runnable getThreadA(final ConditionService service) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0;i<10;i++) {
+                    service.excuteA();
+                }
+            }
+        };
+    }
+
+    private static Runnable getThreadB(final ConditionService service) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0;i<10;i++) {
+                    service.excuteB();
+                }
+            }
+        };
+    }
+
+    private static Runnable getThreadC(final ConditionService service) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0;i<10;i++) {
+                    service.excuteC();
+                }
+            }
+        };
+    }
+
 }
