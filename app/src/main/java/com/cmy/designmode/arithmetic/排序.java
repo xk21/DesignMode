@@ -49,7 +49,7 @@ public class 排序 {
     }
 
     //选择排序
-    public void selectSort(int[]a){
+    public void selectSort(int[] a){
         int len=a.length;
         for(int i=0;i<len;i++){//循环次数
             int value=a[i];
@@ -66,7 +66,7 @@ public class 排序 {
     }
 
     //冒泡排序
-    public static int[] bubbleSort(int []a){
+    public static int[] bubbleSort(int[] a){
         int len=a.length;
         for(int i=0;i<len;i++){
             for(int j=0;j<len-i-1;j++){//注意第二重循环的条件

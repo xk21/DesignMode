@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_anima_alpha"
+        android:icon="@drawable/ic_launcher_background"
+        android:orderInCategory="100"
+        android:title="渐变动画"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_anima_translation"
+        android:orderInCategory="100"
+        android:title="平移动画"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_anima_rotate"
+        android:orderInCategory="100"
+        android:title="旋转动画"
+        app:showAsAction="never" />
+
+</menu>
